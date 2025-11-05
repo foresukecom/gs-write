@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"context"
+	"encoding/csv"
 	"fmt"
+	"gs-write/pkg/auth"
+	"gs-write/pkg/sheets"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -11,20 +15,22 @@ import (
 var (
 	// cfgFile は設定ファイルのパスを保持するグローバル変数です
 	cfgFile string
+	// title is the title of the spreadsheet
+	title string
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "your_cli_app", // ★★★ ここをあなたのCLIアプリケーション名に置き換えてください ★★★
-	Short: "CobraとViperを使用したサンプルGo CLIアプリケーション",
-	Long: `複数行にわたる詳細な説明です。
-アプリケーションの使用例や目的を記載します。
+	Use:   "gs-write",
+	Short: "Write stdin to a new Google Spreadsheet",
+	Long: `gs-write is a simple CLI tool that writes standard input to a new Google Spreadsheet.
+It is designed to work with pipes (|) based on UNIX philosophy.
 
-このアプリケーションは、Cobraを使用した基本的なCLI構造と、
-Viperによる設定管理のデモンストレーションです。`, // 説明を少し変更
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Examples:
+  ls -l | gs-write
+  cat report.csv | gs-write --title "Monthly Report"
+  ps aux | gs-write`,
+	RunE: runRoot,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -37,19 +43,62 @@ func Execute() {
 }
 
 func init() {
-	// rootCmd にフラグや引数を追加する場所
-	// persistent flags are global for the whole application
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is config.toml)")
+	// Add flags
+	rootCmd.Flags().StringVar(&title, "title", "", "Title of the spreadsheet (default: auto-generated from timestamp)")
 
-	// Cobra が初期化される前に特定の関数を実行する設定
-	cobra.OnInitialize(initViper)
-
-	// completion コマンドを無効化
+	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
-	// サブコマンドを追加
+	// Add subcommands
+	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(infoCmd)
+}
+
+func runRoot(cmd *cobra.Command, args []string) error {
+	ctx := context.Background()
+
+	// Load authentication config
+	oauthConfig, token, err := auth.GetClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Create Sheets client
+	client, err := sheets.NewClient(ctx, oauthConfig, token)
+	if err != nil {
+		return err
+	}
+
+	// Read CSV data from stdin
+	data, err := readCSVFromStdin()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV from stdin: %w", err)
+	}
+
+	if len(data) == 0 {
+		return fmt.Errorf("no data provided")
+	}
+
+	// Create spreadsheet
+	url, err := client.CreateSpreadsheet(ctx, title, data)
+	if err != nil {
+		return err
+	}
+
+	// Output the URL
+	fmt.Println(url)
+
+	return nil
+}
+
+// readCSVFromStdin reads CSV data from standard input
+func readCSVFromStdin() ([][]string, error) {
+	reader := csv.NewReader(os.Stdin)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
 }
 
 // initViper reads in config file and ENV variables if set.
@@ -60,15 +109,9 @@ func initViper() {
 	} else {
 		// Search config in current directory and $HOME directory
 		viper.AddConfigPath(".") // プロジェクトルート
-		// viper.AddConfigPath("$HOME/.your_cli_app") // ★★★ 必要であればホームディレクトリ等も追加 ★★★
 		viper.SetConfigName("config") // config.toml, config.json, config.yaml... を探す (拡張子なし)
 		viper.SetConfigType("toml")   // TOML形式であることを明示的に指定
 	}
-
-	// 環境変数から設定を読み込む
-	// 例: YOURAPP_GREETING_PREFIX="Hi, " で greeting.prefix が設定される
-	viper.SetEnvPrefix("YOURAPP") // 環境変数名のプレフィックスを設定
-	viper.AutomaticEnv()          // 環境変数から値を読み込む（プレフィックス付きまたは自動的にマッピング可能なもの）
 
 	viper.SetDefault("debug", false) // デバッグモードのデフォルト
 
@@ -80,11 +123,9 @@ func initViper() {
 		// ConfigFileNotFoundError の場合は警告のみ、それ以外は Fatal
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore
-			// fmt.Fprintln(os.Stderr, "Warning: Config file not found.")
 		} else {
 			// Config file was found but another error was produced
 			fmt.Fprintf(os.Stderr, "Error reading config file: %s\n", err)
-			// os.Exit(1) // 設定読み込みが必須ならここで終了
 		}
 	}
 }
