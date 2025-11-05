@@ -28,7 +28,7 @@ func NewClient(ctx context.Context, config *oauth2.Config, token *oauth2.Token) 
 }
 
 // CreateSpreadsheet creates a new spreadsheet with the given title and data
-func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]string) (string, error) {
+func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]string, freezeRows, freezeCols int) (string, error) {
 	// If no title is provided, generate one from timestamp
 	if title == "" {
 		title = generateDefaultTitle()
@@ -54,11 +54,19 @@ func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]s
 	}
 
 	spreadsheetID := resp.SpreadsheetId
+	sheetID := resp.Sheets[0].Properties.SheetId
 
 	// Write data to the spreadsheet
 	if len(data) > 0 {
 		if err := c.writeData(ctx, spreadsheetID, "Sheet1", data); err != nil {
 			return "", fmt.Errorf("failed to write data: %w", err)
+		}
+	}
+
+	// Apply freeze panes if specified
+	if freezeRows > 0 || freezeCols > 0 {
+		if err := c.setFreezePanes(ctx, spreadsheetID, sheetID, freezeRows, freezeCols); err != nil {
+			return "", fmt.Errorf("failed to set freeze panes: %w", err)
 		}
 	}
 
@@ -90,6 +98,42 @@ func (c *Client) writeData(ctx context.Context, spreadsheetID, sheetName string,
 		valueRange,
 	).ValueInputOption("RAW").Context(ctx).Do()
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// setFreezePanes sets frozen rows and columns for the sheet
+func (c *Client) setFreezePanes(ctx context.Context, spreadsheetID string, sheetID int64, freezeRows, freezeCols int) error {
+	gridProperties := &sheets.GridProperties{}
+
+	if freezeRows > 0 {
+		gridProperties.FrozenRowCount = int64(freezeRows)
+	}
+
+	if freezeCols > 0 {
+		gridProperties.FrozenColumnCount = int64(freezeCols)
+	}
+
+	requests := []*sheets.Request{
+		{
+			UpdateSheetProperties: &sheets.UpdateSheetPropertiesRequest{
+				Properties: &sheets.SheetProperties{
+					SheetId:        sheetID,
+					GridProperties: gridProperties,
+				},
+				Fields: "gridProperties.frozenRowCount,gridProperties.frozenColumnCount",
+			},
+		},
+	}
+
+	batchUpdateRequest := &sheets.BatchUpdateSpreadsheetRequest{
+		Requests: requests,
+	}
+
+	_, err := c.service.Spreadsheets.BatchUpdate(spreadsheetID, batchUpdateRequest).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
