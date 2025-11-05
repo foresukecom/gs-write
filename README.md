@@ -17,6 +17,7 @@ UNIX哲学に基づき、他のコマンドとパイプ(`|`)で連携するこ�
 - パイプ(`|`)で他のコマンドとスムーズに連携可能
 - `--title`オプションでスプレッドシートのタイトルを自由に指定可能
   - タイトルが指定されない場合は、実行日時から自動で命名 (`YYYYMMDDHHMMSS+gs`)
+- `--freeze-rows`と`--freeze-cols`オプションで行と列の固定表示が可能
 - 成功時に、作成されたスプレッドシートのURLを標準出力に返す
 
 ## インストール
@@ -86,9 +87,29 @@ cat report.csv | gs-write | pbcopy
 cat report.csv | gs-write | xclip -selection clipboard
 ```
 
+### 固定表示（Freeze Panes）
+
+ヘッダー行や特定の列を固定表示することができます：
+
+```bash
+# 1行目（ヘッダー行）を固定
+cat data.csv | gs-write --freeze-rows 1
+
+# 最初の2列を固定
+cat data.csv | gs-write --freeze-cols 2
+
+# 1行目と1列目の両方を固定
+cat data.csv | gs-write --freeze-rows 1 --freeze-cols 1
+
+# タイトルと固定表示を組み合わせ
+cat employee.csv | gs-write --title "社員リスト" --freeze-rows 1
+```
+
 ### オプション
 
 - `--title <タイトル>`: スプレッドシートのタイトルを指定します。指定しない場合は、タイムスタンプから自動生成されます。
+- `--freeze-rows <行数>`: 上から指定した行数を固定表示します。`0`の場合は固定なし（デフォルト: `0`）
+- `--freeze-cols <列数>`: 左から指定した列数を固定表示します。`0`の場合は固定なし（デフォルト: `0`）
 
 ### サブコマンド
 
