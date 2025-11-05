@@ -64,6 +64,11 @@ func init() {
 func runRoot(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 
+	// Validate freeze parameters
+	if freezeRows < 0 || freezeCols < 0 {
+		return fmt.Errorf("freeze-rows and freeze-cols must be non-negative (got: rows=%d, cols=%d)", freezeRows, freezeCols)
+	}
+
 	// Load authentication config
 	oauthConfig, token, err := auth.GetClient(ctx)
 	if err != nil {
