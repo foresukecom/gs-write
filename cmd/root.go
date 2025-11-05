@@ -17,6 +17,10 @@ var (
 	cfgFile string
 	// title is the title of the spreadsheet
 	title string
+	// freezeRows is the number of rows to freeze
+	freezeRows int
+	// freezeCols is the number of columns to freeze
+	freezeCols int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -29,7 +33,8 @@ It is designed to work with pipes (|) based on UNIX philosophy.
 Examples:
   ls -l | gs-write
   cat report.csv | gs-write --title "Monthly Report"
-  ps aux | gs-write`,
+  cat data.csv | gs-write --freeze-rows 1 --freeze-cols 0
+  ps aux | gs-write --title "Processes" --freeze-rows 1`,
 	RunE: runRoot,
 }
 
@@ -45,6 +50,8 @@ func Execute() {
 func init() {
 	// Add flags
 	rootCmd.Flags().StringVar(&title, "title", "", "Title of the spreadsheet (default: auto-generated from timestamp)")
+	rootCmd.Flags().IntVar(&freezeRows, "freeze-rows", 0, "Number of rows to freeze (0 = no freeze)")
+	rootCmd.Flags().IntVar(&freezeCols, "freeze-cols", 0, "Number of columns to freeze (0 = no freeze)")
 
 	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -80,7 +87,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create spreadsheet
-	url, err := client.CreateSpreadsheet(ctx, title, data)
+	url, err := client.CreateSpreadsheet(ctx, title, data, freezeRows, freezeCols)
 	if err != nil {
 		return err
 	}
