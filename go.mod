@@ -1,4 +1,4 @@
-module go-cli-template
+module gs-write
 
 go 1.24.2
 

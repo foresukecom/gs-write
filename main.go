@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-cli-template/cmd"
+	"gs-write/cmd"
 )
 
 func main() {

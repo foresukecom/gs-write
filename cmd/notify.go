@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"gs-write/pkg/notifier"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go-cli-template/pkg/notifier"
 )
 
 var notifyCmd = &cobra.Command{
