@@ -18,14 +18,16 @@ var (
 
 var authCmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Authenticate with Google Sheets API",
+	Short: "Authenticate with Google Sheets API / Google Sheets APIで認証",
 	Long: `Authenticate with Google Sheets API using OAuth 2.0.
+OAuth 2.0を使用してGoogle Sheets APIで認証します。
 
 You can provide credentials in two ways:
-1. Interactively paste the credentials JSON
-2. Provide a credentials file using --credentials flag
+認証情報を提供する方法は2つあります:
+1. Interactively paste the credentials JSON / 対話的にcredentials JSONを貼り付け
+2. Provide a credentials file using --credentials flag / --credentialsフラグでファイルを指定
 
-Example:
+Examples / 使用例:
   gs-write auth
   gs-write auth --credentials ./credentials.json`,
 	RunE: runAuth,

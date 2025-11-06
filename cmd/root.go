@@ -29,11 +29,14 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gs-write",
-	Short: "Write stdin to a new Google Spreadsheet",
+	Short: "Write stdin to a new Google Spreadsheet / 標準入力を新しいGoogleスプレッドシートに書き込む",
 	Long: `gs-write is a simple CLI tool that writes standard input to a new Google Spreadsheet.
-It is designed to work with pipes (|) based on UNIX philosophy.
+標準入力を新しいGoogleスプレッドシートに書き込むシンプルなCLIツールです。
 
-Examples:
+It is designed to work with pipes (|) based on UNIX philosophy.
+UNIX哲学に基づき、パイプ(|)で他のコマンドと連携することを前提に設計されています。
+
+Examples / 使用例:
   ls -l | gs-write
   cat report.csv | gs-write --title "Monthly Report"
   cat data.csv | gs-write --freeze-rows 1 --freeze-cols 0

@@ -11,15 +11,16 @@ import (
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Manage gs-write configuration",
+	Short: "Manage gs-write configuration / gs-writeの設定を管理",
 	Long: `Manage gs-write configuration settings.
+gs-writeの設定を管理します。
 
-Available settings:
-  freeze.rows - Number of rows to freeze (default: not set)
-  freeze.cols - Number of columns to freeze (default: not set)
-  filter.header_row - Header row for basic filter (default: not set)
+Available settings / 利用可能な設定:
+  freeze.rows       - Number of rows to freeze / 固定する行数 (default: not set)
+  freeze.cols       - Number of columns to freeze / 固定する列数 (default: not set)
+  filter.header_row - Header row for basic filter / フィルタのヘッダー行 (default: not set)
 
-Examples:
+Examples / 使用例:
   gs-write config list
   gs-write config get freeze.rows
   gs-write config set freeze.rows 1
@@ -29,35 +30,38 @@ Examples:
 
 var configListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all configuration settings",
-	Long:  `Display all current configuration settings.`,
-	RunE:  runConfigList,
+	Short: "List all configuration settings / すべての設定を表示",
+	Long: `Display all current configuration settings.
+現在の設定をすべて表示します。`,
+	RunE: runConfigList,
 }
 
 var configGetCmd = &cobra.Command{
 	Use:   "get <key>",
-	Short: "Get a configuration value",
+	Short: "Get a configuration value / 設定値を取得",
 	Long: `Get the value of a specific configuration setting.
+指定した設定の値を取得します。
 
-Available keys:
-  freeze.rows - Number of rows to freeze
-  freeze.cols - Number of columns to freeze
-  filter.header_row - Header row for basic filter`,
+Available keys / 利用可能なキー:
+  freeze.rows       - Number of rows to freeze / 固定する行数
+  freeze.cols       - Number of columns to freeze / 固定する列数
+  filter.header_row - Header row for basic filter / フィルタのヘッダー行`,
 	Args: cobra.ExactArgs(1),
 	RunE: runConfigGet,
 }
 
 var configSetCmd = &cobra.Command{
 	Use:   "set <key> <value>",
-	Short: "Set a configuration value",
+	Short: "Set a configuration value / 設定値を変更",
 	Long: `Set the value of a specific configuration setting.
+指定した設定の値を変更します。
 
-Available keys:
-  freeze.rows - Number of rows to freeze (must be non-negative integer)
-  freeze.cols - Number of columns to freeze (must be non-negative integer)
-  filter.header_row - Header row for basic filter (must be non-negative integer)
+Available keys / 利用可能なキー:
+  freeze.rows       - Number of rows to freeze / 固定する行数 (must be non-negative integer / 非負の整数)
+  freeze.cols       - Number of columns to freeze / 固定する列数 (must be non-negative integer / 非負の整数)
+  filter.header_row - Header row for basic filter / フィルタのヘッダー行 (must be non-negative integer / 非負の整数)
 
-Examples:
+Examples / 使用例:
   gs-write config set freeze.rows 1
   gs-write config set freeze.cols 2
   gs-write config set filter.header_row 1`,
@@ -67,15 +71,16 @@ Examples:
 
 var configUnsetCmd = &cobra.Command{
 	Use:   "unset <key>",
-	Short: "Unset a configuration value",
+	Short: "Unset a configuration value / 設定値を削除",
 	Long: `Remove a configuration setting, reverting to default behavior.
+設定を削除し、デフォルト動作に戻します。
 
-Available keys:
-  freeze.rows - Number of rows to freeze
-  freeze.cols - Number of columns to freeze
-  filter.header_row - Header row for basic filter
+Available keys / 利用可能なキー:
+  freeze.rows       - Number of rows to freeze / 固定する行数
+  freeze.cols       - Number of columns to freeze / 固定する列数
+  filter.header_row - Header row for basic filter / フィルタのヘッダー行
 
-Examples:
+Examples / 使用例:
   gs-write config unset freeze.rows
   gs-write config unset freeze.cols
   gs-write config unset filter.header_row`,

@@ -20,8 +20,9 @@ var CommitHash string
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "アプリケーションのバージョンを表示",
-	Long:  `このコマンドは、アプリケーションのバージョン番号とビルド情報を表示します。`,
+	Short: "Show application version / アプリケーションのバージョンを表示",
+	Long: `Show the application version number and build information.
+アプリケーションのバージョン番号とビルド情報を表示します。`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// アプリケーション名とバージョンを出力
 		fmt.Printf("%s version: %s\n", rootCmd.Use, Version)
