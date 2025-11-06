@@ -34,7 +34,7 @@ Examples / 使用例:
 }
 
 func init() {
-	authCmd.Flags().StringVar(&credentialsFile, "credentials", "", "Path to credentials.json file")
+	authCmd.Flags().StringVar(&credentialsFile, "credentials", "", "Path to credentials.json file / credentials.jsonファイルのパス")
 }
 
 func runAuth(cmd *cobra.Command, args []string) error {

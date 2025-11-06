@@ -56,12 +56,12 @@ func Execute() {
 
 func init() {
 	// Add flags
-	rootCmd.Flags().StringVar(&title, "title", "", "Title of the spreadsheet (default: auto-generated from timestamp)")
+	rootCmd.Flags().StringVar(&title, "title", "", "Title of the spreadsheet / スプレッドシートのタイトル (default: auto-generated from timestamp / デフォルト: タイムスタンプから自動生成)")
 
 	// Use pointer flags to distinguish between "not set" and "set to 0"
-	freezeRowsFlag = rootCmd.Flags().Int("freeze-rows", -1, "Number of rows to freeze (overrides config file)")
-	freezeColsFlag = rootCmd.Flags().Int("freeze-cols", -1, "Number of columns to freeze (overrides config file)")
-	filterHeaderRowFlag = rootCmd.Flags().Int("filter-header-row", -1, "Header row for basic filter (overrides config file)")
+	freezeRowsFlag = rootCmd.Flags().Int("freeze-rows", -1, "Number of rows to freeze / 固定する行数 (overrides config file / 設定ファイルを上書き)")
+	freezeColsFlag = rootCmd.Flags().Int("freeze-cols", -1, "Number of columns to freeze / 固定する列数 (overrides config file / 設定ファイルを上書き)")
+	filterHeaderRowFlag = rootCmd.Flags().Int("filter-header-row", -1, "Header row for basic filter / フィルタのヘッダー行 (overrides config file / 設定ファイルを上書き)")
 
 	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
