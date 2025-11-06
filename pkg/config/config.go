@@ -18,12 +18,18 @@ const (
 // UserConfig represents the user configuration
 type UserConfig struct {
 	Freeze FreezeConfig `toml:"freeze"`
+	Filter FilterConfig `toml:"filter"`
 }
 
 // FreezeConfig represents freeze panes configuration
 type FreezeConfig struct {
 	Rows *int `toml:"rows,omitempty"`
 	Cols *int `toml:"cols,omitempty"`
+}
+
+// FilterConfig represents basic filter configuration
+type FilterConfig struct {
+	HeaderRow *int `toml:"header_row,omitempty"`
 }
 
 // GetConfigPath returns the full path to the config file
@@ -119,4 +125,22 @@ func (c *UserConfig) UnsetFreezeRows() {
 // UnsetFreezeCols removes the freeze cols setting
 func (c *UserConfig) UnsetFreezeCols() {
 	c.Freeze.Cols = nil
+}
+
+// GetFilterHeaderRow returns the filter header row setting from config
+func (c *UserConfig) GetFilterHeaderRow() (int, bool) {
+	if c.Filter.HeaderRow != nil {
+		return *c.Filter.HeaderRow, true
+	}
+	return 0, false
+}
+
+// SetFilterHeaderRow sets the filter header row setting
+func (c *UserConfig) SetFilterHeaderRow(row int) {
+	c.Filter.HeaderRow = &row
+}
+
+// UnsetFilterHeaderRow removes the filter header row setting
+func (c *UserConfig) UnsetFilterHeaderRow() {
+	c.Filter.HeaderRow = nil
 }
