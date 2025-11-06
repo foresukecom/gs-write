@@ -22,6 +22,8 @@ var (
 	freezeRowsFlag *int
 	// freezeCols is the number of columns to freeze (nil means not set via CLI)
 	freezeColsFlag *int
+	// filterHeaderRow is the header row for basic filter (nil means not set via CLI)
+	filterHeaderRowFlag *int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -35,7 +37,8 @@ Examples:
   ls -l | gs-write
   cat report.csv | gs-write --title "Monthly Report"
   cat data.csv | gs-write --freeze-rows 1 --freeze-cols 0
-  ps aux | gs-write --title "Processes" --freeze-rows 1`,
+  cat data.csv | gs-write --filter-header-row 1
+  ps aux | gs-write --title "Processes" --freeze-rows 1 --filter-header-row 1`,
 	RunE: runRoot,
 }
 
@@ -55,6 +58,7 @@ func init() {
 	// Use pointer flags to distinguish between "not set" and "set to 0"
 	freezeRowsFlag = rootCmd.Flags().Int("freeze-rows", -1, "Number of rows to freeze (overrides config file)")
 	freezeColsFlag = rootCmd.Flags().Int("freeze-cols", -1, "Number of columns to freeze (overrides config file)")
+	filterHeaderRowFlag = rootCmd.Flags().Int("filter-header-row", -1, "Header row for basic filter (overrides config file)")
 
 	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -77,10 +81,14 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	// Determine freeze parameters with priority: CLI > config > default
 	freezeRows := resolveFreezeRows(cmd, userConfig)
 	freezeCols := resolveFreezeCols(cmd, userConfig)
+	filterHeaderRow := resolveFilterHeaderRow(cmd, userConfig)
 
-	// Validate freeze parameters
+	// Validate parameters
 	if freezeRows < 0 || freezeCols < 0 {
 		return fmt.Errorf("freeze-rows and freeze-cols must be non-negative (got: rows=%d, cols=%d)", freezeRows, freezeCols)
+	}
+	if filterHeaderRow < 0 {
+		return fmt.Errorf("filter-header-row must be non-negative (got: %d)", filterHeaderRow)
 	}
 
 	// Load authentication config
@@ -106,7 +114,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create spreadsheet
-	url, err := client.CreateSpreadsheet(ctx, title, data, freezeRows, freezeCols)
+	url, err := client.CreateSpreadsheet(ctx, title, data, freezeRows, freezeCols, filterHeaderRow)
 	if err != nil {
 		return err
 	}
@@ -156,6 +164,22 @@ func resolveFreezeCols(cmd *cobra.Command, userConfig *config.UserConfig) int {
 	}
 
 	// Return default value
+	return 0
+}
+
+// resolveFilterHeaderRow determines the filter header row value with priority: CLI > config > default
+func resolveFilterHeaderRow(cmd *cobra.Command, userConfig *config.UserConfig) int {
+	// Check if CLI flag was explicitly set
+	if cmd.Flags().Changed("filter-header-row") {
+		return *filterHeaderRowFlag
+	}
+
+	// Check if config has a value
+	if headerRow, ok := userConfig.GetFilterHeaderRow(); ok {
+		return headerRow
+	}
+
+	// Return default value (0 means no filter)
 	return 0
 }
 
