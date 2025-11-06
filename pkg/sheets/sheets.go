@@ -28,7 +28,7 @@ func NewClient(ctx context.Context, config *oauth2.Config, token *oauth2.Token) 
 }
 
 // CreateSpreadsheet creates a new spreadsheet with the given title and data
-func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]string, freezeRows, freezeCols int) (string, error) {
+func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]string, freezeRows, freezeCols, filterHeaderRow int) (string, error) {
 	// If no title is provided, generate one from timestamp
 	if title == "" {
 		title = generateDefaultTitle()
@@ -67,6 +67,13 @@ func (c *Client) CreateSpreadsheet(ctx context.Context, title string, data [][]s
 	if freezeRows > 0 || freezeCols > 0 {
 		if err := c.setFreezePanes(ctx, spreadsheetID, sheetID, freezeRows, freezeCols); err != nil {
 			return "", fmt.Errorf("failed to set freeze panes: %w", err)
+		}
+	}
+
+	// Apply basic filter if specified
+	if filterHeaderRow > 0 {
+		if err := c.setBasicFilter(ctx, spreadsheetID, sheetID, filterHeaderRow, len(data), len(data[0])); err != nil {
+			return "", fmt.Errorf("failed to set basic filter: %w", err)
 		}
 	}
 
@@ -125,6 +132,40 @@ func (c *Client) setFreezePanes(ctx context.Context, spreadsheetID string, sheet
 					GridProperties: gridProperties,
 				},
 				Fields: "gridProperties.frozenRowCount,gridProperties.frozenColumnCount",
+			},
+		},
+	}
+
+	batchUpdateRequest := &sheets.BatchUpdateSpreadsheetRequest{
+		Requests: requests,
+	}
+
+	_, err := c.service.Spreadsheets.BatchUpdate(spreadsheetID, batchUpdateRequest).Context(ctx).Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// setBasicFilter sets a basic filter for the sheet
+func (c *Client) setBasicFilter(ctx context.Context, spreadsheetID string, sheetID int64, headerRow, numRows, numCols int) error {
+	// Basic filter range starts from the header row (0-indexed)
+	// and spans all columns and rows from header to end
+	filterRange := &sheets.GridRange{
+		SheetId:          sheetID,
+		StartRowIndex:    int64(headerRow - 1), // Convert to 0-indexed
+		EndRowIndex:      int64(numRows),
+		StartColumnIndex: 0,
+		EndColumnIndex:   int64(numCols),
+	}
+
+	requests := []*sheets.Request{
+		{
+			SetBasicFilter: &sheets.SetBasicFilterRequest{
+				Filter: &sheets.BasicFilter{
+					Range: filterRange,
+				},
 			},
 		},
 	}
