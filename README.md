@@ -18,6 +18,7 @@ UNIX哲学に基づき、他のコマンドとパイプ(`|`)で連携するこ�
 - `--title`オプションでスプレッドシートのタイトルを自由に指定可能
   - タイトルが指定されない場合は、実行日時から自動で命名 (`YYYYMMDDHHMMSS+gs`)
 - `--freeze-rows`と`--freeze-cols`オプションで行と列の固定表示が可能
+- `--filter-header-row`オプションで基本フィルタの設定が可能
 - 成功時に、作成されたスプレッドシートのURLを標準出力に返す
 
 ## インストール
@@ -105,15 +106,34 @@ cat data.csv | gs-write --freeze-rows 1 --freeze-cols 1
 cat employee.csv | gs-write --title "社員リスト" --freeze-rows 1
 ```
 
+### 基本フィルタ（Basic Filter）
+
+データに対して基本フィルタを設定することができます：
+
+```bash
+# 1行目をヘッダーとしてフィルタを設定
+cat data.csv | gs-write --filter-header-row 1
+
+# 2行目をヘッダーとしてフィルタを設定
+cat data.csv | gs-write --filter-header-row 2
+
+# 固定表示とフィルタを組み合わせ
+cat data.csv | gs-write --freeze-rows 1 --filter-header-row 1
+
+# すべてのオプションを組み合わせ
+cat employee.csv | gs-write --title "社員リスト" --freeze-rows 1 --filter-header-row 1
+```
+
 ### オプション
 
 - `--title <タイトル>`: スプレッドシートのタイトルを指定します。指定しない場合は、タイムスタンプから自動生成されます。
 - `--freeze-rows <行数>`: 上から指定した行数を固定表示します。設定ファイルの値を上書きします。
 - `--freeze-cols <列数>`: 左から指定した列数を固定表示します。設定ファイルの値を上書きします。
+- `--filter-header-row <行番号>`: 指定した行をヘッダーとして基本フィルタを設定します。設定ファイルの値を上書きします。
 
 ### 設定ファイル
 
-頻繁に使用する設定値（固定行数・固定列数など）は、設定ファイルに保存しておくことができます。
+頻繁に使用する設定値（固定行数・固定列数・フィルタヘッダー行など）は、設定ファイルに保存しておくことができます。
 
 設定ファイルは `~/.config/gs-write/config.toml` に保存され、`gs-write config` コマンドで管理できます。
 
@@ -125,19 +145,23 @@ gs-write config list
 
 # 特定の設定値を取得
 gs-write config get freeze.rows
+gs-write config get filter.header_row
 
 # 設定値を変更
 gs-write config set freeze.rows 1
 gs-write config set freeze.cols 2
+gs-write config set filter.header_row 1
 
 # 設定値を削除（デフォルト値に戻す）
 gs-write config unset freeze.rows
+gs-write config unset filter.header_row
 ```
 
 #### 利用可能な設定項目
 
-- `freeze.rows`: 固定する行数（デフォルト: 設定なし）
-- `freeze.cols`: 固定する列数（デフォルト: 設定なし）
+- `freeze.rows`: 固定する行数（デフォルト: 0）
+- `freeze.cols`: 固定する列数（デフォルト: 0）
+- `filter.header_row`: フィルタのヘッダー行番号（デフォルト: 0 = フィルタなし）
 
 ### サブコマンド
 
