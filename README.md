@@ -64,7 +64,7 @@ gs-write auth
 gs-write auth --credentials ./credentials.json
 ```
 
-認証が成功すると、認証情報とトークンが `~/.config/gs-write/config.toml` に保存されます。
+認証が成功すると、認証情報とトークンが `~/.config/gs-write/auth.json` に保存されます。
 
 ## 使い方
 
@@ -108,8 +108,36 @@ cat employee.csv | gs-write --title "社員リスト" --freeze-rows 1
 ### オプション
 
 - `--title <タイトル>`: スプレッドシートのタイトルを指定します。指定しない場合は、タイムスタンプから自動生成されます。
-- `--freeze-rows <行数>`: 上から指定した行数を固定表示します。`0`の場合は固定なし（デフォルト: `0`）
-- `--freeze-cols <列数>`: 左から指定した列数を固定表示します。`0`の場合は固定なし（デフォルト: `0`）
+- `--freeze-rows <行数>`: 上から指定した行数を固定表示します。設定ファイルの値を上書きします。
+- `--freeze-cols <列数>`: 左から指定した列数を固定表示します。設定ファイルの値を上書きします。
+
+### 設定ファイル
+
+頻繁に使用する設定値（固定行数・固定列数など）は、設定ファイルに保存しておくことができます。
+
+設定ファイルは `~/.config/gs-write/config.toml` に保存され、`gs-write config` コマンドで管理できます。
+
+コマンドラインオプションが指定された場合、設定ファイルの値は上書きされます（優先順位: CLI > 設定ファイル > デフォルト値）。
+
+```bash
+# 現在の設定を表示
+gs-write config list
+
+# 特定の設定値を取得
+gs-write config get freeze.rows
+
+# 設定値を変更
+gs-write config set freeze.rows 1
+gs-write config set freeze.cols 2
+
+# 設定値を削除（デフォルト値に戻す）
+gs-write config unset freeze.rows
+```
+
+#### 利用可能な設定項目
+
+- `freeze.rows`: 固定する行数（デフォルト: 設定なし）
+- `freeze.cols`: 固定する列数（デフォルト: 設定なし）
 
 ### サブコマンド
 
@@ -123,6 +151,24 @@ gs-write auth
 
 # ファイルから認証情報を読み込み
 gs-write auth --credentials ./credentials.json
+```
+
+#### `gs-write config`
+
+設定ファイルを管理します。
+
+```bash
+# 設定一覧を表示
+gs-write config list
+
+# 特定の設定値を取得
+gs-write config get freeze.rows
+
+# 設定値を変更
+gs-write config set freeze.rows 1
+
+# 設定値を削除
+gs-write config unset freeze.rows
 ```
 
 #### `gs-write version`
@@ -152,17 +198,27 @@ Bob,25,Osaka" | gs-write --title "User List"
 ├── README.md           # このファイル
 ├── cmd/                # Cobraコマンド定義
 │   ├── auth.go         # 認証コマンド
+│   ├── config.go       # 設定コマンド
 │   ├── root.go         # ルートコマンド（メイン機能）
 │   └── version.go      # バージョンコマンド
 ├── pkg/                # 内部パッケージ
 │   ├── auth/           # 認証処理
 │   │   └── auth.go
+│   ├── config/         # 設定管理
+│   │   └── config.go
 │   └── sheets/         # Google Sheets API クライアント
 │       └── sheets.go
 ├── go.mod              # Go Modules
 ├── go.sum              # Go Modules チェックサム
 └── main.go             # エントリーポイント
 ```
+
+## 設定ファイルの場所
+
+gs-writeは以下のファイルを使用します：
+
+- `~/.config/gs-write/auth.json` - OAuth 2.0認証情報とトークン
+- `~/.config/gs-write/config.toml` - ユーザー設定（freeze.rows、freeze.colsなど）
 
 ## トラブルシューティング
 
