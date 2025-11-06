@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"gs-write/pkg/auth"
+	"gs-write/pkg/config"
 	"gs-write/pkg/sheets"
 	"os"
 
@@ -17,10 +18,10 @@ var (
 	cfgFile string
 	// title is the title of the spreadsheet
 	title string
-	// freezeRows is the number of rows to freeze
-	freezeRows int
-	// freezeCols is the number of columns to freeze
-	freezeCols int
+	// freezeRows is the number of rows to freeze (nil means not set via CLI)
+	freezeRowsFlag *int
+	// freezeCols is the number of columns to freeze (nil means not set via CLI)
+	freezeColsFlag *int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,19 +51,32 @@ func Execute() {
 func init() {
 	// Add flags
 	rootCmd.Flags().StringVar(&title, "title", "", "Title of the spreadsheet (default: auto-generated from timestamp)")
-	rootCmd.Flags().IntVar(&freezeRows, "freeze-rows", 0, "Number of rows to freeze (0 = no freeze)")
-	rootCmd.Flags().IntVar(&freezeCols, "freeze-cols", 0, "Number of columns to freeze (0 = no freeze)")
+
+	// Use pointer flags to distinguish between "not set" and "set to 0"
+	freezeRowsFlag = rootCmd.Flags().Int("freeze-rows", -1, "Number of rows to freeze (overrides config file)")
+	freezeColsFlag = rootCmd.Flags().Int("freeze-cols", -1, "Number of columns to freeze (overrides config file)")
 
 	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
 	// Add subcommands
 	rootCmd.AddCommand(authCmd)
+	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 
 func runRoot(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
+
+	// Load user config
+	userConfig, err := config.LoadUserConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	// Determine freeze parameters with priority: CLI > config > default
+	freezeRows := resolveFreezeRows(cmd, userConfig)
+	freezeCols := resolveFreezeCols(cmd, userConfig)
 
 	// Validate freeze parameters
 	if freezeRows < 0 || freezeCols < 0 {
@@ -111,6 +125,38 @@ func readCSVFromStdin() ([][]string, error) {
 		return nil, err
 	}
 	return records, nil
+}
+
+// resolveFreezeRows determines the freeze rows value with priority: CLI > config > default
+func resolveFreezeRows(cmd *cobra.Command, userConfig *config.UserConfig) int {
+	// Check if CLI flag was explicitly set
+	if cmd.Flags().Changed("freeze-rows") {
+		return *freezeRowsFlag
+	}
+
+	// Check if config has a value
+	if rows, ok := userConfig.GetFreezeRows(); ok {
+		return rows
+	}
+
+	// Return default value
+	return 0
+}
+
+// resolveFreezeCols determines the freeze cols value with priority: CLI > config > default
+func resolveFreezeCols(cmd *cobra.Command, userConfig *config.UserConfig) int {
+	// Check if CLI flag was explicitly set
+	if cmd.Flags().Changed("freeze-cols") {
+		return *freezeColsFlag
+	}
+
+	// Check if config has a value
+	if cols, ok := userConfig.GetFreezeCols(); ok {
+		return cols
+	}
+
+	// Return default value
+	return 0
 }
 
 // initViper reads in config file and ENV variables if set.
