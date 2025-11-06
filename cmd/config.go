@@ -17,11 +17,13 @@ var configCmd = &cobra.Command{
 Available settings:
   freeze.rows - Number of rows to freeze (default: not set)
   freeze.cols - Number of columns to freeze (default: not set)
+  filter.header_row - Header row for basic filter (default: not set)
 
 Examples:
   gs-write config list
   gs-write config get freeze.rows
   gs-write config set freeze.rows 1
+  gs-write config set filter.header_row 1
   gs-write config unset freeze.rows`,
 }
 
@@ -39,7 +41,8 @@ var configGetCmd = &cobra.Command{
 
 Available keys:
   freeze.rows - Number of rows to freeze
-  freeze.cols - Number of columns to freeze`,
+  freeze.cols - Number of columns to freeze
+  filter.header_row - Header row for basic filter`,
 	Args: cobra.ExactArgs(1),
 	RunE: runConfigGet,
 }
@@ -52,10 +55,12 @@ var configSetCmd = &cobra.Command{
 Available keys:
   freeze.rows - Number of rows to freeze (must be non-negative integer)
   freeze.cols - Number of columns to freeze (must be non-negative integer)
+  filter.header_row - Header row for basic filter (must be non-negative integer)
 
 Examples:
   gs-write config set freeze.rows 1
-  gs-write config set freeze.cols 2`,
+  gs-write config set freeze.cols 2
+  gs-write config set filter.header_row 1`,
 	Args: cobra.ExactArgs(2),
 	RunE: runConfigSet,
 }
@@ -68,10 +73,12 @@ var configUnsetCmd = &cobra.Command{
 Available keys:
   freeze.rows - Number of rows to freeze
   freeze.cols - Number of columns to freeze
+  filter.header_row - Header row for basic filter
 
 Examples:
   gs-write config unset freeze.rows
-  gs-write config unset freeze.cols`,
+  gs-write config unset freeze.cols
+  gs-write config unset filter.header_row`,
 	Args: cobra.ExactArgs(1),
 	RunE: runConfigUnset,
 }
@@ -98,6 +105,9 @@ func runConfigList(cmd *cobra.Command, args []string) error {
 	cols, _ := cfg.GetFreezeCols()
 	fmt.Printf("  freeze.cols = %d\n", cols)
 
+	headerRow, _ := cfg.GetFilterHeaderRow()
+	fmt.Printf("  filter.header_row = %d\n", headerRow)
+
 	return nil
 }
 
@@ -118,6 +128,10 @@ func runConfigGet(cmd *cobra.Command, args []string) error {
 		// Always return the effective value (user configured or default)
 		cols, _ := cfg.GetFreezeCols()
 		fmt.Println(cols)
+	case "filter.header_row":
+		// Always return the effective value (user configured or default)
+		headerRow, _ := cfg.GetFilterHeaderRow()
+		fmt.Println(headerRow)
 	default:
 		return fmt.Errorf("unknown configuration key: %s", key)
 	}
@@ -157,6 +171,17 @@ func runConfigSet(cmd *cobra.Command, args []string) error {
 		cfg.SetFreezeCols(value)
 		fmt.Printf("Set freeze.cols = %d\n", value)
 
+	case "filter.header_row":
+		value, err := strconv.Atoi(valueStr)
+		if err != nil {
+			return fmt.Errorf("invalid value for filter.header_row: must be an integer")
+		}
+		if value < 0 {
+			return fmt.Errorf("invalid value for filter.header_row: must be non-negative (got: %d)", value)
+		}
+		cfg.SetFilterHeaderRow(value)
+		fmt.Printf("Set filter.header_row = %d\n", value)
+
 	default:
 		return fmt.Errorf("unknown configuration key: %s", key)
 	}
@@ -187,6 +212,10 @@ func runConfigUnset(cmd *cobra.Command, args []string) error {
 	case "freeze.cols":
 		cfg.UnsetFreezeCols()
 		fmt.Println("Unset freeze.cols")
+
+	case "filter.header_row":
+		cfg.UnsetFilterHeaderRow()
+		fmt.Println("Unset filter.header_row")
 
 	default:
 		return fmt.Errorf("unknown configuration key: %s", key)
