@@ -82,18 +82,18 @@ func runAuth(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Save config
-	config := &auth.Config{
+	// Save authentication config
+	config := &auth.AuthConfig{
 		Credentials: oauthConfig,
 		Token:       token,
 	}
 
-	if err := auth.SaveConfig(config); err != nil {
+	if err := auth.SaveAuthConfig(config); err != nil {
 		return err
 	}
 
-	configPath, _ := auth.GetConfigPath()
-	fmt.Printf("\nAuthentication successful!\nConfiguration saved to: %s\n", configPath)
+	authPath, _ := auth.GetAuthPath()
+	fmt.Printf("\nAuthentication successful!\nAuthentication saved to: %s\n", authPath)
 
 	return nil
 }
