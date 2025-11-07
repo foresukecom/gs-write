@@ -284,9 +284,3 @@ Issue や Pull Request を歓迎します！
 ```bash
 go build -o gs-write .
 ```
-
-### テスト
-
-```bash
-go test ./...
-```

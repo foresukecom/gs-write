@@ -284,9 +284,3 @@ This project can be developed using VS Code Dev Containers.
 ```bash
 go build -o gs-write .
 ```
-
-### Test
-
-```bash
-go test ./...
-```
