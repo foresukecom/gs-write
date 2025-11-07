@@ -32,7 +32,7 @@ builds:
       - -X '{{.ModulePath}}/cmd.CommitHash={{.Commit}}'
 
 archives:
-  - format: binary
+  - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
