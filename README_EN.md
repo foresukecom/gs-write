@@ -25,16 +25,64 @@ A new spreadsheet is created with each execution, and the URL of the created she
 
 ## Installation
 
+### Download Pre-built Binary (Recommended)
+
+Download the appropriate file for your platform from the [Releases page](https://github.com/foresukecom/gs-write/releases).
+
+#### macOS
+
+**For Intel Mac:**
+```bash
+# Download
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Darwin_x86_64.tar.gz
+# Extract
+tar xzf gs-write_Darwin_x86_64.tar.gz
+# Move to executable location
+sudo mv gs-write /usr/local/bin/
+```
+
+**For Apple Silicon (M1/M2/M3):**
+```bash
+# Download
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Darwin_arm64.tar.gz
+# Extract
+tar xzf gs-write_Darwin_arm64.tar.gz
+# Move to executable location
+sudo mv gs-write /usr/local/bin/
+```
+
+#### Linux
+
+```bash
+# Download
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Linux_x86_64.tar.gz
+# Extract
+tar xzf gs-write_Linux_x86_64.tar.gz
+# Move to executable location
+sudo mv gs-write /usr/local/bin/
+```
+
+#### Windows
+
+1. Download [gs-write_Windows_x86_64.zip](https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Windows_x86_64.zip)
+2. Extract the ZIP file
+3. Place `gs-write.exe` in your desired folder
+4. Add to PATH if needed
+
+### Install via Go
+
 If you have a Go environment set up, you can install with the following command:
 
 ```bash
-go install github.com/your-username/gs-write@latest
+go install github.com/foresukecom/gs-write@latest
 ```
 
-Or clone this repository and build:
+### Build from Source
+
+Clone this repository and build:
 
 ```bash
-git clone https://github.com/your-username/gs-write.git
+git clone https://github.com/foresukecom/gs-write.git
 cd gs-write
 go build -o gs-write .
 ```

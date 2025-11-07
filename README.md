@@ -25,16 +25,64 @@
 
 ## インストール
 
+### バイナリをダウンロード（推奨）
+
+[Releases ページ](https://github.com/foresukecom/gs-write/releases)から、お使いの環境に応じたファイルをダウンロードしてください。
+
+#### macOS
+
+**Intel Mac の場合:**
+```bash
+# ダウンロード
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Darwin_x86_64.tar.gz
+# 解凍
+tar xzf gs-write_Darwin_x86_64.tar.gz
+# 実行可能な場所に移動
+sudo mv gs-write /usr/local/bin/
+```
+
+**Apple Silicon (M1/M2/M3) の場合:**
+```bash
+# ダウンロード
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Darwin_arm64.tar.gz
+# 解凍
+tar xzf gs-write_Darwin_arm64.tar.gz
+# 実行可能な場所に移動
+sudo mv gs-write /usr/local/bin/
+```
+
+#### Linux
+
+```bash
+# ダウンロード
+curl -LO https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Linux_x86_64.tar.gz
+# 解凍
+tar xzf gs-write_Linux_x86_64.tar.gz
+# 実行可能な場所に移動
+sudo mv gs-write /usr/local/bin/
+```
+
+#### Windows
+
+1. [gs-write_Windows_x86_64.zip](https://github.com/foresukecom/gs-write/releases/latest/download/gs-write_Windows_x86_64.zip) をダウンロード
+2. ZIPファイルを解凍
+3. `gs-write.exe` を任意のフォルダに配置
+4. 必要に応じてPATHを通す
+
+### Go言語環境からインストール
+
 Go言語の環境がセットアップされている場合、以下のコマンドでインストールできます。
 
 ```bash
-go install github.com/your-username/gs-write@latest
+go install github.com/foresukecom/gs-write@latest
 ```
 
-または、このリポジトリをクローンしてビルド：
+### ソースからビルド
+
+このリポジトリをクローンしてビルド：
 
 ```bash
-git clone https://github.com/your-username/gs-write.git
+git clone https://github.com/foresukecom/gs-write.git
 cd gs-write
 go build -o gs-write .
 ```
