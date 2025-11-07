@@ -1,7 +1,9 @@
 # gs-write
 
+[English](README_EN.md) | 日本語
+
 標準入力を新しいGoogleスプレッドシートに書き出すシンプルなCLIツールです。
-UNIX哲学に基づき、他のコマンドとパイプ(`|`)で連携することを前提に設計されています。
+パイプ(`|`)で他のコマンドと簡単に連携できます。
 
 ![Go](https://img.shields.io/badge/Go-1.24-blue.svg)
 
@@ -219,7 +221,8 @@ Bob,25,Osaka" | gs-write --title "User List"
 
 ```
 .
-├── README.md           # このファイル
+├── README.md           # このファイル（日本語）
+├── README_EN.md        # このファイル（英語）
 ├── cmd/                # Cobraコマンド定義
 │   ├── auth.go         # 認証コマンド
 │   ├── config.go       # 設定コマンド

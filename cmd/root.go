@@ -33,8 +33,8 @@ var rootCmd = &cobra.Command{
 	Long: `gs-write is a simple CLI tool that writes standard input to a new Google Spreadsheet.
 標準入力を新しいGoogleスプレッドシートに書き込むシンプルなCLIツールです。
 
-It is designed to work with pipes (|) based on UNIX philosophy.
-UNIX哲学に基づき、パイプ(|)で他のコマンドと連携することを前提に設計されています。
+It works seamlessly with pipes (|) to connect with other commands.
+パイプ(|)で他のコマンドと簡単に連携できます。
 
 Examples / 使用例:
   ls -l | gs-write
