@@ -210,12 +210,36 @@ cat data.csv | gs-write --freeze-rows 1 --filter-header-row 1
 cat employee.csv | gs-write --title "社員リスト" --freeze-rows 1 --filter-header-row 1
 ```
 
+### 文字エンコーディング
+
+Shift_JIS（SJIS）やEUC-JPなど、UTF-8以外のエンコーディングのCSVファイルを扱うことができます：
+
+```bash
+# Shift_JIS（SJIS）エンコーディングのCSVファイルを読み込む
+cat data_sjis.csv | gs-write --encoding sjis
+
+# EUC-JPエンコーディングのCSVファイルを読み込む
+cat data_eucjp.csv | gs-write --encoding euc-jp
+
+# UTF-8（デフォルト）の場合は指定不要
+cat data_utf8.csv | gs-write
+
+# エンコーディングとその他のオプションを組み合わせ
+cat data_sjis.csv | gs-write --encoding sjis --title "社員リスト" --freeze-rows 1
+```
+
+サポートされているエンコーディング：
+- `utf-8`（デフォルト）：UTF-8エンコーディング
+- `sjis`：Shift_JIS（Windows標準の日本語エンコーディング）
+- `euc-jp`：EUC-JP（Unix系の日本語エンコーディング）
+
 ### オプション
 
 - `--title <タイトル>`: スプレッドシートのタイトルを指定します。指定しない場合は、タイムスタンプから自動生成されます。
 - `--freeze-rows <行数>`: 上から指定した行数を固定表示します。設定ファイルの値を上書きします。
 - `--freeze-cols <列数>`: 左から指定した列数を固定表示します。設定ファイルの値を上書きします。
 - `--filter-header-row <行番号>`: 指定した行をヘッダーとして基本フィルタを設定します。設定ファイルの値を上書きします。
+- `--encoding <エンコーディング>`: 入力CSVの文字エンコーディングを指定します（`utf-8`, `sjis`, `euc-jp`）。デフォルトは`utf-8`です。
 
 ### 設定ファイル
 

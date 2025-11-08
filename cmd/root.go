@@ -7,10 +7,14 @@ import (
 	"gs-write/pkg/auth"
 	"gs-write/pkg/config"
 	"gs-write/pkg/sheets"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
 
 var (
@@ -24,6 +28,8 @@ var (
 	freezeColsFlag *int
 	// filterHeaderRow is the header row for basic filter (nil means not set via CLI)
 	filterHeaderRowFlag *int
+	// encoding is the character encoding of the input CSV
+	encodingFlag string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -41,6 +47,7 @@ Examples / 使用例:
   cat report.csv | gs-write --title "Monthly Report"
   cat data.csv | gs-write --freeze-rows 1 --freeze-cols 0
   cat data.csv | gs-write --filter-header-row 1
+  cat data.csv | gs-write --encoding sjis
   ps aux | gs-write --title "Processes" --freeze-rows 1 --filter-header-row 1`,
 	RunE: runRoot,
 }
@@ -62,6 +69,9 @@ func init() {
 	freezeRowsFlag = rootCmd.Flags().Int("freeze-rows", -1, "Number of rows to freeze / 固定する行数 (overrides config file / 設定ファイルを上書き)")
 	freezeColsFlag = rootCmd.Flags().Int("freeze-cols", -1, "Number of columns to freeze / 固定する列数 (overrides config file / 設定ファイルを上書き)")
 	filterHeaderRowFlag = rootCmd.Flags().Int("filter-header-row", -1, "Header row for basic filter / フィルタのヘッダー行 (overrides config file / 設定ファイルを上書き)")
+
+	// Add encoding flag
+	rootCmd.Flags().StringVar(&encodingFlag, "encoding", "utf-8", "Character encoding of input CSV / 入力CSVの文字エンコーディング (utf-8, sjis, euc-jp)")
 
 	// Disable completion command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -106,8 +116,8 @@ func runRoot(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Read CSV data from stdin
-	data, err := readCSVFromStdin()
+	// Read CSV data from stdin with encoding conversion
+	data, err := readCSVFromStdin(encodingFlag)
 	if err != nil {
 		return fmt.Errorf("failed to read CSV from stdin: %w", err)
 	}
@@ -128,14 +138,46 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// readCSVFromStdin reads CSV data from standard input
-func readCSVFromStdin() ([][]string, error) {
-	reader := csv.NewReader(os.Stdin)
-	records, err := reader.ReadAll()
+// readCSVFromStdin reads CSV data from standard input with character encoding conversion
+func readCSVFromStdin(encodingName string) ([][]string, error) {
+	// Get the decoder for the specified encoding
+	decoder, err := getEncodingDecoder(encodingName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a reader with encoding conversion
+	var reader io.Reader
+	if decoder != nil {
+		// Convert from the specified encoding to UTF-8
+		reader = transform.NewReader(os.Stdin, decoder)
+	} else {
+		// No conversion needed for UTF-8
+		reader = os.Stdin
+	}
+
+	// Parse CSV
+	csvReader := csv.NewReader(reader)
+	records, err := csvReader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 	return records, nil
+}
+
+// getEncodingDecoder returns the decoder for the specified encoding name
+func getEncodingDecoder(encodingName string) (*encoding.Decoder, error) {
+	switch encodingName {
+	case "utf-8", "utf8", "UTF-8", "UTF8":
+		// No conversion needed for UTF-8
+		return nil, nil
+	case "sjis", "shift-jis", "shift_jis", "SJIS", "Shift-JIS", "Shift_JIS":
+		return japanese.ShiftJIS.NewDecoder(), nil
+	case "euc-jp", "euc_jp", "eucjp", "EUC-JP", "EUC_JP", "EUCJP":
+		return japanese.EUCJP.NewDecoder(), nil
+	default:
+		return nil, fmt.Errorf("unsupported encoding: %s (supported: utf-8, sjis, euc-jp)", encodingName)
+	}
 }
 
 // resolveFreezeRows determines the freeze rows value with priority: CLI > config > default

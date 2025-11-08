@@ -210,12 +210,36 @@ cat data.csv | gs-write --freeze-rows 1 --filter-header-row 1
 cat employee.csv | gs-write --title "Employee List" --freeze-rows 1 --filter-header-row 1
 ```
 
+### Character Encoding
+
+You can handle CSV files with encodings other than UTF-8, such as Shift_JIS (SJIS) or EUC-JP:
+
+```bash
+# Read CSV file with Shift_JIS (SJIS) encoding
+cat data_sjis.csv | gs-write --encoding sjis
+
+# Read CSV file with EUC-JP encoding
+cat data_eucjp.csv | gs-write --encoding euc-jp
+
+# UTF-8 (default) doesn't require specification
+cat data_utf8.csv | gs-write
+
+# Combine encoding with other options
+cat data_sjis.csv | gs-write --encoding sjis --title "Employee List" --freeze-rows 1
+```
+
+Supported encodings:
+- `utf-8` (default): UTF-8 encoding
+- `sjis`: Shift_JIS (standard Japanese encoding on Windows)
+- `euc-jp`: EUC-JP (Japanese encoding on Unix-like systems)
+
 ### Options
 
 - `--title <title>`: Specify the spreadsheet title. If not specified, it's automatically generated from the timestamp.
 - `--freeze-rows <number>`: Freeze the specified number of rows from the top. Overrides config file value.
 - `--freeze-cols <number>`: Freeze the specified number of columns from the left. Overrides config file value.
 - `--filter-header-row <row-number>`: Set basic filter with the specified row as header. Overrides config file value.
+- `--encoding <encoding>`: Specify the character encoding of input CSV (`utf-8`, `sjis`, `euc-jp`). Default is `utf-8`.
 
 ### Configuration File
 
