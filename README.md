@@ -115,6 +115,42 @@ gs-write auth
 gs-write auth --credentials ./credentials.json
 ```
 
+#### 認証フロー
+
+コマンドを実行すると、以下の手順で認証を行います：
+
+1. **認証URLが表示されます**
+   ```
+   Please visit the following URL to authorize this application:
+   https://accounts.google.com/o/oauth2/auth?...
+   ```
+
+2. **ブラウザでURLにアクセス**
+   - 表示されたURLをブラウザで開きます
+   - Googleアカウントでログインします
+
+3. **アプリケーションを承認**
+   - 「[アプリ名] が Google アカウントへのアクセスを求めています」という画面が表示されます
+   - 「続行」をクリックします
+
+4. **認証コードを取得**
+   - 承認後、`http://localhost` へリダイレクトされ、通常は `ERR_CONNECTION_REFUSED` エラーが表示されます
+   - **これは正常な動作です**
+   - ブラウザのアドレスバーに表示されているURLから `code=` 以降の文字列をコピーします
+   - 例: `http://localhost/?code=4/0AbCD...XYZ&scope=...` の場合、`4/0AbCD...XYZ` の部分がコードです
+
+5. **認証コードを入力**
+   ```
+   Enter the authorization code:
+   ```
+   - ターミナルに戻り、コピーした認証コードを貼り付けてEnterキーを押します
+
+6. **認証完了**
+   ```
+   Authentication successful!
+   Authentication saved to: ~/.config/gs-write/auth.json
+   ```
+
 認証が成功すると、認証情報とトークンが `~/.config/gs-write/auth.json` に保存されます。
 
 ## 使い方

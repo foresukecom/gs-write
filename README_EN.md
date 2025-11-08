@@ -115,6 +115,42 @@ Follow the prompts to paste the contents of `credentials.json`.
 gs-write auth --credentials ./credentials.json
 ```
 
+#### Authentication Flow
+
+When you run the command, follow these steps to authenticate:
+
+1. **An authorization URL will be displayed**
+   ```
+   Please visit the following URL to authorize this application:
+   https://accounts.google.com/o/oauth2/auth?...
+   ```
+
+2. **Open the URL in your browser**
+   - Open the displayed URL in your browser
+   - Sign in with your Google account
+
+3. **Authorize the application**
+   - You'll see a screen saying "[App name] wants to access your Google Account"
+   - Click "Continue"
+
+4. **Get the authorization code**
+   - After authorization, you'll be redirected to `http://localhost`, which typically shows an `ERR_CONNECTION_REFUSED` error
+   - **This is expected behavior**
+   - Copy the code from the URL in your browser's address bar after `code=`
+   - Example: For `http://localhost/?code=4/0AbCD...XYZ&scope=...`, copy `4/0AbCD...XYZ`
+
+5. **Enter the authorization code**
+   ```
+   Enter the authorization code:
+   ```
+   - Return to your terminal and paste the copied authorization code, then press Enter
+
+6. **Authentication complete**
+   ```
+   Authentication successful!
+   Authentication saved to: ~/.config/gs-write/auth.json
+   ```
+
 When authentication is successful, credentials and tokens are saved to `~/.config/gs-write/auth.json`.
 
 ## Usage
