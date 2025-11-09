@@ -371,7 +371,7 @@ Google Sheets APIには利用制限があります。大量のリクエストを
 
 ## ライセンス
 
-MIT License
+このプロジェクトは MIT License の下でライセンスされています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
 
 ## 貢献
 
